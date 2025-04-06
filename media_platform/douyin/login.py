@@ -81,12 +81,15 @@ class DouYinLogin(AbstractLogin):
 
     @retry(stop=stop_after_attempt(600), wait=wait_fixed(1), retry=retry_if_result(lambda value: value is False))
     async def check_login_state(self):
-        """Check if the current login status is successful and return True otherwise return False"""
+        """检查当前登录状态"""
+        # 获取当前cookie
         current_cookie = await self.browser_context.cookies()
         _, cookie_dict = utils.convert_cookies(current_cookie)
 
+        # 双重检查：localStorage 和 Cookie
         for page in self.browser_context.pages:
             try:
+                # 检查localStorage中的登录标志
                 local_storage = await page.evaluate("() => window.localStorage")
                 if local_storage.get("HasUserLogin", "") == "1":
                     return True
@@ -94,6 +97,7 @@ class DouYinLogin(AbstractLogin):
                 # utils.logger.warn(f"[DouYinLogin] check_login_state waring: {e}")
                 await asyncio.sleep(0.1)
 
+        # 检查Cookie中的登录状态
         if cookie_dict.get("LOGIN_STATUS") == "1":
             return True
 

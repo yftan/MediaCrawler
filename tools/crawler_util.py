@@ -132,6 +132,13 @@ def get_mobile_user_agent() -> str:
 
 
 def convert_cookies(cookies: Optional[List[Cookie]]) -> Tuple[str, Dict]:
+    """转换Playwright的cookies为字符串和字典格式
+    参数:
+        cookies_list: Playwright浏览器的cookies列表
+    返回:
+        Tuple[str, Dict]: cookie字符串和cookie字典
+    """
+    # 如果没有cookies则返回空字符串和空字典 
     if not cookies:
         return "", {}
     cookies_str = ";".join([f"{cookie.get('name')}={cookie.get('value')}" for cookie in cookies])
