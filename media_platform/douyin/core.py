@@ -161,17 +161,20 @@ class DouYinCrawler(AbstractCrawler):
                 
                 try:
                     utils.logger.info(f"[DouYinCrawler.search] search douyin keyword: {keyword}, page: {page}")
-                    
+  
                     # 添加请求延迟
                     await self.add_request_delay(f"搜索关键词 '{keyword}' 第{page}页")
                     
                     # 调用API搜索
-                    posts_res = await self.dy_client.search_info_by_keyword(
-                        keyword=keyword,
-                        offset=page * dy_limit_count - dy_limit_count,  # 计算偏移量
-                        publish_time=PublishTimeType(config.PUBLISH_TIME_TYPE),  # 发布时间筛选
-                        search_id=dy_search_id  # 搜索ID用于翻页
-                    )
+                    posts_res = await self.dy_client.search_info_by_keyword(keyword=keyword,
+                                                                            offset=page * dy_limit_count - dy_limit_count,
+                                                                            publish_time=PublishTimeType(config.PUBLISH_TIME_TYPE),
+                                                                            search_id=dy_search_id
+                                                                            )
+                    if posts_res.get("data") is None or posts_res.get("data") == []:
+                        utils.logger.info(f"[DouYinCrawler.search] search douyin keyword: {keyword}, page: {page} is empty,{posts_res.get('data')}`")
+                        break
+
                 except DataFetchError:
                     # 搜索失败，跳出循环
                     utils.logger.error(f"[DouYinCrawler.search] search douyin keyword: {keyword} failed")
